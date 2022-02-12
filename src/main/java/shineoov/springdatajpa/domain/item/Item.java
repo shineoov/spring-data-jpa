@@ -1,4 +1,4 @@
-package shineoov.springdatajpa.domain;
+package shineoov.springdatajpa.domain.item;
 
 import lombok.ToString;
 

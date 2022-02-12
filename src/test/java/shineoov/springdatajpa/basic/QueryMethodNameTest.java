@@ -7,8 +7,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import shineoov.springdatajpa.domain.Item;
-import shineoov.springdatajpa.domain.ItemRepository;
+import shineoov.springdatajpa.domain.item.Item;
+import shineoov.springdatajpa.domain.item.ItemRepository;
 
 import java.util.List;
 

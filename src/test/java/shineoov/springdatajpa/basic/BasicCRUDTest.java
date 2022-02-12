@@ -9,8 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
-import shineoov.springdatajpa.domain.Item;
-import shineoov.springdatajpa.domain.ItemRepository;
+import shineoov.springdatajpa.domain.item.Item;
+import shineoov.springdatajpa.domain.item.ItemRepository;
 
 import java.util.List;
 import java.util.Optional;

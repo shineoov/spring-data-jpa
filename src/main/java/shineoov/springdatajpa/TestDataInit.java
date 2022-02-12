@@ -2,8 +2,8 @@ package shineoov.springdatajpa;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import shineoov.springdatajpa.domain.Item;
-import shineoov.springdatajpa.domain.ItemRepository;
+import shineoov.springdatajpa.domain.item.Item;
+import shineoov.springdatajpa.domain.item.ItemRepository;
 
 import javax.annotation.PostConstruct;
 

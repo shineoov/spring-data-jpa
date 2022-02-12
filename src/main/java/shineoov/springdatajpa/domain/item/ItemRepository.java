@@ -1,4 +1,4 @@
-package shineoov.springdatajpa.domain;
+package shineoov.springdatajpa.domain.item;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
