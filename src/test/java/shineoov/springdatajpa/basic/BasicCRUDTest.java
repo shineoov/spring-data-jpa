@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @Slf4j
 @SpringBootTest
-@DisplayName("기본 SPRING DATA JPA 사용")
+@DisplayName("기본 CRUD 사용")
 public class BasicCRUDTest {
 
     @Autowired
