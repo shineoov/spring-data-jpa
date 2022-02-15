@@ -88,4 +88,23 @@ public class OneWayJoinTest {
         member.setTeam(null);
         teamRepository.delete(team);
     }
+
+    @Test
+    @DisplayName("JPQL 조회 ")
+    void lookupWithJPQL() {
+        //given
+        TeamV1 team = new TeamV1("LG");
+        teamRepository.save(team);
+
+        MemberV1 member = MemberV1.builder()
+                .username("Oh")
+                .team(team)
+                .build();
+        memberRepository.save(member);
+
+        // select
+        MemberV1 findMember = memberRepository.findByUsername("Oh");
+        log.info("findMember={}", findMember);
+        log.info("findMember.teamName={}", findMember.getTeam().getName());
+    }
 }
