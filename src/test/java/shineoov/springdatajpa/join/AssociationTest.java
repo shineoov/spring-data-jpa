@@ -19,8 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @Transactional
 @Commit
 @SpringBootTest
-@DisplayName("단방향 연관관계 테스트")
-public class OneWayJoinTest {
+@DisplayName("연관관계 테스트")
+public class AssociationTest {
 
     @Autowired
     MemberV1Repository memberRepository;
@@ -29,24 +29,25 @@ public class OneWayJoinTest {
     TeamV1Repository teamRepository;
 
     @Test
-    @DisplayName("기본 저장")
+    @DisplayName("저장")
     void save() {
         //given
         TeamV1 team = new TeamV1("LG");
         teamRepository.save(team);
 
-        MemberV1 memberV1 = MemberV1.builder()
+        MemberV1 member = MemberV1.builder()
                 .username("Oh")
-                .team(team)
                 .build();
+        member.setTeam(team);
 
         //when
-        memberRepository.save(memberV1);
+        memberRepository.save(member);
 
         //then
         assertAll(
                 () -> assertThat(team.getId()).isNotNull(),
-                () -> assertThat(team).isEqualTo(memberV1.getTeam())
+                () -> assertThat(team).isEqualTo(member.getTeam()),
+                () -> assertThat(team.getMembers()).contains(member)
         );
     }
 
@@ -54,21 +55,27 @@ public class OneWayJoinTest {
     @DisplayName("수정")
     void updateTeam() {
         //given
-        TeamV1 team = new TeamV1("LG");
-        teamRepository.save(team);
+        TeamV1 teamA = new TeamV1("LG");
+        teamRepository.save(teamA);
 
         MemberV1 member = MemberV1.builder()
                 .username("Oh")
-                .team(team)
                 .build();
+
+        member.setTeam(teamA);
         memberRepository.save(member);
 
-        TeamV1 newTeam = new TeamV1("KT");
-        teamRepository.save(newTeam);
+        TeamV1 teamB = new TeamV1("KT");
+        teamRepository.save(teamB);
 
         //update
-        member.setTeam(newTeam);
-        log.info("member.team={}", member.getTeam());
+        member.setTeam(teamB);
+
+        assertAll(
+                () -> assertThat(teamA.getMembers()).doesNotContain(member),
+                () -> assertThat(teamB.getMembers()).contains(member),
+                () -> assertThat(member.getTeam()).isEqualTo(teamB)
+        );
     }
 
     @Test

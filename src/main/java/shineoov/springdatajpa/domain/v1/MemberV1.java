@@ -15,6 +15,7 @@ public class MemberV1 {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id")
     private Long id;
 
     private String username;
@@ -24,7 +25,12 @@ public class MemberV1 {
     private TeamV1 team;
 
     public void setTeam(TeamV1 team) {
+        // 반대방향 객체 그래프 탐색이 가능하도록
+        if(this.team != null) {
+            this.team.getMembers().remove(this);
+        }
         this.team = team;
+        team.getMembers().add(this);
     }
 
     public Long getId() {
