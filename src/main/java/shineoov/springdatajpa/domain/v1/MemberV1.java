@@ -30,7 +30,9 @@ public class MemberV1 {
             this.team.getMembers().remove(this);
         }
         this.team = team;
-        team.getMembers().add(this);
+        if(team != null) {
+            team.getMembers().add(this);
+        }
     }
 
     public Long getId() {
