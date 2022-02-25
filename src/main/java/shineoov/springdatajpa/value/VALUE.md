@@ -14,3 +14,10 @@
 
 
 ### 컬렉션 값 타입 (collection value type)
+- 새로운 테이블이 생성된다.
+- 값 타입 컬렉션이 매핑된 테이블에 데이터가 많다면 OneToMany 관계를 고려해야 한다.
+- 사용할 때는 모두 삭제하고 다시 저장하는 최악의 시나리오를 고려하면서 사용해야 한다.
+
+#### 적용
+- @ElementCollection
+- @CollectionTable

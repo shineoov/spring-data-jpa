@@ -3,6 +3,10 @@ package shineoov.springdatajpa.value;
 import lombok.Getter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Getter
 @Entity(name = "EmbeddedMember")
@@ -15,11 +19,26 @@ public class Member {
 
     private String name;
 
-    @Embedded Period workPeriod;
+    @ElementCollection
+    @CollectionTable(name = "FAVORITE_FOODS", joinColumns = @JoinColumn(name = "member_id"))
+    @Column(name = "food_name")
+    private Set<String> favoriteFoods = new HashSet<>();
 
-    @Embedded Address address;
+    @ElementCollection
+    @CollectionTable(name = "address", joinColumns = @JoinColumn(name = "member_id"))
+    private List<Address> addressHistory = new ArrayList<>();
+
+    @Embedded
+    Period workPeriod;
+
+    @Embedded
+    Address address;
 
     public Member() {
+    }
+
+    public Member(String name) {
+        this.name = name;
     }
 
     public Member(String name, Period workPeriod, Address address) {
