@@ -1,4 +1,4 @@
-package shineoov.springdatajpa.domain.inheritance.mapped;
+package shineoov.springdatajpa.inheritance.mapped;
 
 import javax.persistence.Entity;
 

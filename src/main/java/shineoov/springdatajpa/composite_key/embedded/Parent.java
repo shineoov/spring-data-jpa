@@ -1,4 +1,4 @@
-package shineoov.springdatajpa.domain.composite_key.embedded;
+package shineoov.springdatajpa.composite_key.embedded;
 
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;

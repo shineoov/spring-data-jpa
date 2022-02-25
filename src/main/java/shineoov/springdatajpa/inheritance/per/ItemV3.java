@@ -1,4 +1,4 @@
-package shineoov.springdatajpa.domain.inheritance.per;
+package shineoov.springdatajpa.inheritance.per;
 
 import javax.persistence.*;
 

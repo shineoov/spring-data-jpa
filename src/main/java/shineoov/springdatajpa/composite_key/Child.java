@@ -1,4 +1,4 @@
-package shineoov.springdatajpa.domain.composite_key;
+package shineoov.springdatajpa.composite_key;
 
 import javax.persistence.*;
 

@@ -1,16 +1,20 @@
-package shineoov.springdatajpa.domain.composite_key.embedded;
+package shineoov.springdatajpa.composite_key;
 
-import javax.persistence.Column;
 import java.io.Serializable;
 import java.util.Objects;
 
 public class ParentId implements Serializable {
 
-    @Column(name = "parent_id1")
     private String id1;
-
-    @Column(name = "parent_id2")
     private String id2;
+
+    public ParentId() {
+    }
+
+    public ParentId(String id1, String id2) {
+        this.id1 = id1;
+        this.id2 = id2;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -25,3 +29,6 @@ public class ParentId implements Serializable {
         return Objects.hash(id1, id2);
     }
 }
+
+
+

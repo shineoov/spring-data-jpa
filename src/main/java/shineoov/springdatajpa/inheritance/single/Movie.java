@@ -1,4 +1,4 @@
-package shineoov.springdatajpa.domain.inheritance.single;
+package shineoov.springdatajpa.inheritance.single;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;

@@ -1,4 +1,4 @@
-package shineoov.springdatajpa.domain.inheritance.join;
+package shineoov.springdatajpa.inheritance.join;
 
 import javax.persistence.*;
 
