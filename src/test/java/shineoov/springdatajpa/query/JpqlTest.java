@@ -1,5 +1,6 @@
 package shineoov.springdatajpa.query;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +9,11 @@ import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -21,6 +25,11 @@ public class JpqlTest {
 
     @Autowired
     EntityManager em;
+
+    @BeforeEach
+    void setUp() {
+        em.createQuery("DELETE FROM QueryMember ").executeUpdate();
+    }
 
     @Test
     @DisplayName("조회하기")
@@ -151,6 +160,66 @@ public class JpqlTest {
         assertAll(
                 () -> assertThat(memberList.size()).isEqualTo(maxResult),
                 () -> assertThat(memberList.get(startPosition)).isEqualTo(memberC)
+        );
+    }
+
+    @Test
+    @DisplayName("집합 함수")
+    void setFunction() {
+        //given
+        Member memberA = Member.builder().username("memberA").age(10).build();
+        Member memberB = Member.builder().username("memberB").age(20).build();
+        Member memberC = Member.builder().username("memberC").age(30).build();
+        em.persist(memberA);
+        em.persist(memberB);
+        em.persist(memberC);
+
+        //when
+        StringBuffer sb = new StringBuffer();
+        sb.append("select new shineoov.springdatajpa.query.MemberStatisticsDto(count(m), sum(m.age), avg(m.age), max(m.age), min(m.age))");
+        sb.append("from QueryMember AS m");
+
+        MemberStatisticsDto memberStatisticsDto =
+                em.createQuery(sb.toString(), MemberStatisticsDto.class).getSingleResult();
+
+        //then
+        assertAll(
+                () -> assertThat(memberStatisticsDto.getCount()).isEqualTo(3L),
+                () -> assertThat(memberStatisticsDto.getSum()).isEqualTo(60L),
+                () -> assertThat(memberStatisticsDto.getAvg()).isEqualTo(20.0),
+                () -> assertThat(memberStatisticsDto.getMax()).isEqualTo(30),
+                () -> assertThat(memberStatisticsDto.getMin()).isEqualTo(10)
+        );
+    }
+
+    @Test
+    @DisplayName("group by + having")
+    void groupByAndHaving() {
+        //given
+        Member memberA = Member.builder().username("memberA").age(10).build();
+        Member memberB = Member.builder().username("memberA").age(20).build();
+        Member memberC = Member.builder().username("memberB").age(30).build();
+        Member memberD = Member.builder().username("memberB").age(30).build();
+        em.persist(memberA);
+        em.persist(memberB);
+        em.persist(memberC);
+        em.persist(memberD);
+
+        //when
+        Map<String, Integer> result =
+                em.createQuery(
+                        "SELECT m.username as username, sum(m.age) as age from QueryMember as m group by m.username ",
+                                Tuple.class)
+                        .getResultStream()
+                        .collect(Collectors.toMap(
+                                tuple -> (tuple.get("username").toString()),
+                                tuple -> ((Number) tuple.get("age")).intValue()
+                        ));
+
+        //then
+        assertAll(
+                () -> assertThat(result.get("memberA")).isEqualTo(30),
+                () -> assertThat(result.get("memberB")).isEqualTo(60)
         );
     }
 }
