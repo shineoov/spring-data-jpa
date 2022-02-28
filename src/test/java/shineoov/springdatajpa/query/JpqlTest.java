@@ -104,8 +104,8 @@ public class JpqlTest {
     @DisplayName("프로젝션 - Scala Type")
     void projection_Scala() {
         //given
-        Member memberA = Member.builder().username("memberA").build();
-        Member memberB = Member.builder().username("memberB").build();
+        Member memberA = new Member("memberA");
+        Member memberB = new Member("memberB");
         em.persist(memberA);
         em.persist(memberB);
 
@@ -113,15 +113,15 @@ public class JpqlTest {
         List<String> usernameList = em.createQuery("SELECT m.username FROM QueryMember AS m ", String.class).getResultList();
 
         //then
-        assertThat(usernameList).containsExactly("memberA", "memberB");
+        assertThat(usernameList).containsExactly(memberA.getUsername(), memberB.getUsername());
     }
 
     @Test
     @DisplayName("프로젝션 - dto 로 여러값 조회")
     void projection_MultiValue_withDto() {
         //given
-        Member memberA = Member.builder().username("memberA").age(10).build();
-        Member memberB = Member.builder().username("memberB").age(20).build();
+        Member memberA = new Member("memberA", 10);
+        Member memberB = new Member("memberB", 20);
         em.persist(memberA);
         em.persist(memberB);
 
@@ -132,8 +132,8 @@ public class JpqlTest {
 
         //then
         assertThat(memberDtoList).containsExactly(
-                new MemberDto("memberA", 10),
-                new MemberDto("memberB", 20)
+                new MemberDto(memberA.getUsername(), memberA.getAge()),
+                new MemberDto(memberB.getUsername(), memberB.getAge())
         );
     }
 
@@ -141,9 +141,9 @@ public class JpqlTest {
     @DisplayName("페이징 쿼리 사용")
     void usePagingQuery() {
         //given
-        Member memberA = Member.builder().username("memberA").age(10).build();
-        Member memberB = Member.builder().username("memberB").age(20).build();
-        Member memberC = Member.builder().username("memberC").age(30).build();
+        Member memberA = new Member("memberA", 10);
+        Member memberB = new Member("memberB", 20);
+        Member memberC = new Member("memberC", 30);
         em.persist(memberA);
         em.persist(memberB);
         em.persist(memberC);
@@ -167,12 +167,9 @@ public class JpqlTest {
     @DisplayName("집합 함수")
     void setFunction() {
         //given
-        Member memberA = Member.builder().username("memberA").age(10).build();
-        Member memberB = Member.builder().username("memberB").age(20).build();
-        Member memberC = Member.builder().username("memberC").age(30).build();
-        em.persist(memberA);
-        em.persist(memberB);
-        em.persist(memberC);
+        em.persist(new Member("memberA", 10));
+        em.persist(new Member("memberB", 20));
+        em.persist(new Member("memberC", 30));
 
         //when
         StringBuffer sb = new StringBuffer();
@@ -196,14 +193,10 @@ public class JpqlTest {
     @DisplayName("group by + having")
     void groupByAndHaving() {
         //given
-        Member memberA = Member.builder().username("memberA").age(10).build();
-        Member memberB = Member.builder().username("memberA").age(20).build();
-        Member memberC = Member.builder().username("memberB").age(30).build();
-        Member memberD = Member.builder().username("memberB").age(30).build();
-        em.persist(memberA);
-        em.persist(memberB);
-        em.persist(memberC);
-        em.persist(memberD);
+        em.persist(new Member("memberA", 10));
+        em.persist(new Member("memberA", 20));
+        em.persist(new Member("memberB", 30));
+        em.persist(new Member("memberB", 30));
 
         //when
         Map<String, Integer> result =
