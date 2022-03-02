@@ -264,4 +264,29 @@ public class JpqlTest {
                 () -> assertThat(memberList.get(0).getTeam()).isNull()
         );
     }
+
+    @Test
+    @DisplayName("join on")
+    void onJoin() {
+        //given
+        String teamName = "oh";
+        Team teamA = new Team(teamName);
+        em.persist(teamA);
+
+        Member memberA = new Member("oh", 10);
+        memberA.setTeam(teamA);
+        em.persist(memberA);
+
+        //when
+        // mysql query
+        // select member0_.id as id1_23_, member0_.age as age2_23_, member0_.team_id as team_id4_23_, member0_.name as name3_23_
+        // from query_member member0_ inner join query_team team1_ on (team1_.name=member0_.name)
+        List<Member> memberList = em.createQuery("SELECT m FROM QueryMember m INNER JOIN QueryTeam t ON t.name = m.username ", Member.class)
+                .getResultList();
+
+        //then
+        assertAll(
+                () -> assertThat(memberList.size()).isEqualTo(1)
+        );
+    }
 }
