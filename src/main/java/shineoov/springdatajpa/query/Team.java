@@ -12,4 +12,11 @@ public class Team {
     private Long id;
 
     private String name;
+
+    public Team() {
+    }
+
+    public Team(String name) {
+        this.name = name;
+    }
 }

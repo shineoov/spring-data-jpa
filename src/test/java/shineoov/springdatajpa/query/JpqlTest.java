@@ -201,7 +201,7 @@ public class JpqlTest {
         //when
         Map<String, Integer> result =
                 em.createQuery(
-                        "SELECT m.username as username, sum(m.age) as age from QueryMember as m group by m.username ",
+                                "SELECT m.username as username, sum(m.age) as age from QueryMember as m group by m.username ",
                                 Tuple.class)
                         .getResultStream()
                         .collect(Collectors.toMap(
@@ -213,6 +213,55 @@ public class JpqlTest {
         assertAll(
                 () -> assertThat(result.get("memberA")).isEqualTo(30),
                 () -> assertThat(result.get("memberB")).isEqualTo(60)
+        );
+    }
+
+    @Test
+    @DisplayName("inner join")
+    void innerJoin() {
+        //given
+        String teamName = "teamA";
+        Team teamA = new Team(teamName);
+        em.persist(teamA);
+
+        Member memberA = new Member("userA", 10);
+        memberA.setTeam(teamA);
+        em.persist(memberA);
+
+        //when
+        String query = "SELECT m FROM QueryMember m INNER JOIN m.team t WHERE t.name = :teamName "; // inner 생략 가능
+        // mysql query
+        // mysql: select member0_.id as id1_23_, member0_.age as age2_23_, member0_.team_id as team_id4_23_, member0_.name as name3_23_
+        // from query_member member0_ inner join query_team team1_ on member0_.team_id=team1_.id where team1_.name='teamA'
+        List<Member> memberList = em.createQuery(query, Member.class)
+                .setParameter("teamName", teamName)
+                .getResultList();
+
+        //then
+        assertAll(
+                () -> assertThat(memberList.size()).isEqualTo(1),
+                () -> assertThat(memberList.get(0).getTeam()).isEqualTo(teamA)
+        );
+    }
+
+    @Test
+    @DisplayName("outer join")
+    void outerJoin() {
+        //given
+        Member memberA = new Member("userA", 10);
+        em.persist(memberA);
+
+        //when
+        // mysql query
+        // select member0_.id as id1_23_, member0_.age as age2_23_, member0_.team_id as team_id4_23_, member0_.name as name3_23_
+        // from query_member member0_ left outer join query_team team1_ on member0_.team_id=team1_.id
+        List<Member> memberList =
+                em.createQuery("SELECT m FROM QueryMember m LEFT JOIN m.team t", Member.class).getResultList();
+
+        //then
+        assertAll(
+                () -> assertThat(memberList.size()).isEqualTo(1),
+                () -> assertThat(memberList.get(0).getTeam()).isNull()
         );
     }
 }
