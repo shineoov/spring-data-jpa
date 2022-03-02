@@ -289,4 +289,67 @@ public class JpqlTest {
                 () -> assertThat(memberList.size()).isEqualTo(1)
         );
     }
+
+    @Test
+    @DisplayName("페치 조인")
+    void fetchJoin() {
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member memberA = new Member("userA", 10);
+        memberA.setTeam(teamA);
+        em.persist(memberA);
+
+        //when
+        // mysql query
+        // select member0_.id as id1_23_0_, team1_.id as id1_26_1_, member0_.age as age2_23_0_, member0_.team_id as team_id4_23_0_, member0_.name as name3_23_0_, team1_.name as name2_26_1_
+        // from query_member member0_ inner join query_team team1_ on member0_.team_id=team1_.id
+        List<Member> memberList = em.createQuery("SELECT m FROM QueryMember m JOIN FETCH m.team", Member.class)
+                .getResultList();
+
+        //then
+        assertAll(
+                () -> assertThat(memberList.size()).isEqualTo(1),
+                () -> assertThat(memberList.get(0).getTeam()).isEqualTo(teamA)
+        );
+    }
+
+    @Test
+    @DisplayName("컬렉션 페치 조인")
+    void fetchJoinAsCollection() {
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member memberA = new Member("userA", 10, teamA);
+        Member memberB = new Member("userB", 20, teamA);
+        Member memberC = new Member("userC", 30, teamA);
+        em.persist(memberA);
+        em.persist(memberB);
+        em.persist(memberC);
+
+        em.flush();
+        em.clear();
+
+        //when
+        //mysql query
+        // select team0_.id as id1_26_0_, memberlist1_.id as id1_23_1_, team0_.name as name2_26_0_, memberlist1_.age as age2_23_1_, memberlist1_.team_id as team_id4_23_1_, memberlist1_.name as name3_23_1_, memberlist1_.team_id as team_id4_23_0__, memberlist1_.id as id1_23_0__
+        // from query_team team0_ inner join query_member memberlist1_ on team0_.id=memberlist1_.team_id where team0_.name='teamA'
+        List<Team> teamList = em.createQuery("SELECT t FROM QueryTeam t JOIN FETCH t.memberList WHERE t.name = :teamName", Team.class)
+                .setParameter("teamName", "teamA")
+                .getResultList();
+
+        for (Team team : teamList) {
+            System.out.println(team.getMemberList());
+        }
+
+        //then
+        assertAll(
+                () -> assertThat(teamList.size()).isEqualTo(3),
+                () -> assertThat(teamList.get(0).getMemberList().size()).isEqualTo(3),
+                () -> assertThat(teamList.get(1).getMemberList().size()).isEqualTo(3),
+                () -> assertThat(teamList.get(2).getMemberList().size()).isEqualTo(3)
+        );
+    }
 }

@@ -1,9 +1,12 @@
 package shineoov.springdatajpa.query;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import lombok.Getter;
 
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Getter
 @Entity(name = "QueryTeam")
 public class Team {
 
@@ -12,6 +15,9 @@ public class Team {
     private Long id;
 
     private String name;
+
+    @OneToMany(mappedBy = "team")
+    private List<Member> memberList = new ArrayList<>();
 
     public Team() {
     }
