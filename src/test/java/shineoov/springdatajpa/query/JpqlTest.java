@@ -372,4 +372,45 @@ public class JpqlTest {
         //then
         assertThat(memberList.size()).isEqualTo(2);
     }
+
+    @Test
+    @DisplayName("named query")
+    void namedQuery() {
+        //given
+        String username = "memberA";
+        em.persist(new Member(username, 20));
+
+        //when
+        Member findMember = em.createNamedQuery("Member.findByUsername", Member.class)
+                .setParameter("username", username)
+                .getSingleResult();
+
+        //then
+        assertThat(findMember.getId()).isNotNull();
+
+        assertThat(findMember.getUsername()).isEqualTo(username);
+    }
+
+    @Test
+    @DisplayName("named query 여러개")
+    void namedQueries() {
+        //given
+        em.persist(new Team("teamA"));
+        em.persist(new Team("teamB"));
+
+        //when
+        List<Team> teamList = em.createNamedQuery("QueryTeam.findByName", Team.class)
+                .setParameter("teamName", "teamA")
+                .getResultList();
+
+        Long allCount = em.createNamedQuery("QueryTeam.count", Long.class)
+                .getSingleResult();
+
+        //then
+        assertAll(
+                () -> assertThat(teamList.size()).isEqualTo(1),
+                () -> assertThat(allCount).isEqualTo(2L)
+        );
+    }
+
 }

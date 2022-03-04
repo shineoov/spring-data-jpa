@@ -8,6 +8,16 @@ import java.util.List;
 
 @Getter
 @Entity(name = "QueryTeam")
+@NamedQueries({
+    @NamedQuery(
+            name = "QueryTeam.findByName",
+            query = "select t from QueryTeam t where t.name = :teamName"
+    ),
+    @NamedQuery(
+            name = "QueryTeam.count",
+            query = "select count(t) from QueryTeam t"
+    )
+})
 public class Team {
 
     @Id

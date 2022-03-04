@@ -15,6 +15,10 @@ import java.util.Objects;
 @Builder
 @Getter
 @Entity(name = "QueryMember")
+@NamedQuery(
+        name = "Member.findByUsername",
+        query = "select m from QueryMember m where m.username = :username"
+)
 public class Member {
 
     @Id
