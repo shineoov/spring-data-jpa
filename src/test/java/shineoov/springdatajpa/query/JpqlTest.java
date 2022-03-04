@@ -357,15 +357,10 @@ public class JpqlTest {
     @DisplayName("서브쿼리")
     void subQuery() {
         //given
-        Member memberA = Member.builder().username("teamA").age(20).build();
-        Member memberB = Member.builder().username("teamA").age(20).build();
-        Member memberC = Member.builder().username("teamA").age(30).build();
-        Member memberD = Member.builder().username("teamA").age(30).build();
-
-        em.persist(memberA);
-        em.persist(memberB);
-        em.persist(memberC);
-        em.persist(memberD);
+        em.persist(new Member("memberA", 20));
+        em.persist(new Member("memberB", 20));
+        em.persist(new Member("memberC", 30));
+        em.persist(new Member("memberA", 30));
 
         //when
         //mysql query
