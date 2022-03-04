@@ -352,4 +352,29 @@ public class JpqlTest {
                 () -> assertThat(teamList.get(2).getMemberList().size()).isEqualTo(3)
         );
     }
+
+    @Test
+    @DisplayName("서브쿼리")
+    void subQuery() {
+        //given
+        Member memberA = Member.builder().username("teamA").age(20).build();
+        Member memberB = Member.builder().username("teamA").age(20).build();
+        Member memberC = Member.builder().username("teamA").age(30).build();
+        Member memberD = Member.builder().username("teamA").age(30).build();
+
+        em.persist(memberA);
+        em.persist(memberB);
+        em.persist(memberC);
+        em.persist(memberD);
+
+        //when
+        //mysql query
+        // select member0_.id as id1_23_, member0_.age as age2_23_, member0_.team_id as team_id4_23_, member0_.name as name3_23_
+        // from query_member member0_ where member0_.age > (select avg(member1_.age) from query_member member1_)
+        List<Member> memberList = em.createQuery("select m from QueryMember m where m.age > (select avg(m2.age) from QueryMember  m2)", Member.class)
+                .getResultList();
+
+        //then
+        assertThat(memberList.size()).isEqualTo(2);
+    }
 }
