@@ -50,4 +50,47 @@ public class QuerydslTest {
         //then
         assertThat(memberList.size()).isEqualTo(2);
     }
+
+    @Test
+    @DisplayName("검색 조건 - 1")
+    void condition_V1() {
+        //given
+        em.persist(new Member("memberA", 10));
+        em.persist(new Member("memberA", 20));
+        em.persist(new Member("memberA", 30));
+        em.persist(new Member("memberA", 40));
+
+        //when
+        QMember member = QMember.member;
+
+        List<Member> memberList = query.selectFrom(member)
+                .where(member.username.eq("memberA").and(member.age.goe(30)))
+                .orderBy(member.id.desc())
+                .fetch();
+
+        //then
+        assertThat(memberList.size()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("검색 조건 - 2")
+    void condition_V2() {
+        //given
+        em.persist(new Member("memberA", 10));
+        em.persist(new Member("memberB", 20));
+        em.persist(new Member("memberA", 30));
+        em.persist(new Member("memberB", 40));
+
+        //when
+        QMember member = QMember.member;
+        List<Member> memberList = query.selectFrom(member)
+//                .where(member.username.contains("ber"))
+//                .where(member.username.startsWith("m"))
+                .where(member.username.endsWith("B").and(member.age.between(10, 20)))
+                .orderBy(member.id.desc())
+                .fetch();
+
+        //then
+        assertThat(memberList.size()).isEqualTo(1);
+    }
 }
