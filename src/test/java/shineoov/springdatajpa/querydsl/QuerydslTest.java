@@ -13,6 +13,8 @@ import javax.persistence.EntityManager;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static shineoov.springdatajpa.querydsl.QMember.*;
 
 @Transactional
 @SpringBootTest
@@ -92,5 +94,29 @@ public class QuerydslTest {
 
         //then
         assertThat(memberList.size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("페이징 정렬")
+    void pagingAndSort() {
+        //given
+        em.persist(new Member("memberA", 10));
+        em.persist(new Member("memberB", 20));
+        em.persist(new Member("memberA", 30));
+
+        Member memberToBeFound = new Member("memberB", 40);
+        em.persist(memberToBeFound);
+
+        //when
+        List<Member> memberList = query.selectFrom(member)
+                .orderBy(member.username.desc(), member.id.desc())
+                .offset(0).limit(1)
+                .fetch();
+
+        //then
+        assertAll(
+                () -> assertThat(memberList.size()).isEqualTo(1),
+                () -> assertThat(memberList.get(0)).isEqualTo(memberToBeFound)
+        );
     }
 }
