@@ -1,6 +1,5 @@
 package shineoov.springdatajpa.querydsl;
 
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,49 +11,42 @@ import java.util.Objects;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "QueryDslMember")
-public class Member {
+@Entity(name = "QueryDslOrderItem")
+public class OrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username;
+    private String name;
 
-    private int age;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private Order order;
 
-    @OneToMany(mappedBy = "member")
-    private List<Order> orderList = new ArrayList<>();
 
-
-    public Member(String username) {
-        this.username = username;
-    }
-
-    public Member(String username, int age) {
-        this.username = username;
-        this.age = age;
+    public OrderItem(Order order) {
+        this.order = order;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Member member = (Member) o;
-        return age == member.age && Objects.equals(id, member.id) && Objects.equals(username, member.username);
+        OrderItem orderItem = (OrderItem) o;
+        return Objects.equals(id, orderItem.id) && Objects.equals(order, orderItem.order);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, age);
+        return Objects.hash(id, order);
     }
 
     @Override
     public String toString() {
-        return "Member{" +
+        return "OrderItem{" +
                 "id=" + id +
-                ", username='" + username + '\'' +
-                ", age=" + age +
+                ", order=" + order +
                 '}';
     }
 }

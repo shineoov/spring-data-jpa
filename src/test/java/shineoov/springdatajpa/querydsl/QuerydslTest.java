@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -14,8 +15,11 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static shineoov.springdatajpa.querydsl.QMember.*;
+import static shineoov.springdatajpa.querydsl.QMember.member;
+import static shineoov.springdatajpa.querydsl.QOrder.order;
+import static shineoov.springdatajpa.querydsl.QOrderItem.orderItem;
 
+@Commit
 @Transactional
 @SpringBootTest
 public class QuerydslTest {
@@ -119,4 +123,83 @@ public class QuerydslTest {
                 () -> assertThat(memberList.get(0)).isEqualTo(memberToBeFound)
         );
     }
+
+    @Test
+    @DisplayName("basic join")
+    void join() {
+        //given
+        Member memberA = new Member("memberA", 10);
+        em.persist(memberA);
+
+        Order order = new Order("orderName", memberA);
+        em.persist(order);
+
+        OrderItem orderItem = new OrderItem(order);
+        em.persist(orderItem);
+
+        em.flush();
+        em.clear();
+
+        //when
+//      SELECT order0_.id AS id1_24_, order0_.member_id AS member_i3_24_,order0_.name AS name2_24_
+//      FROM query_dsl_order order0_
+//      INNER JOIN query_dsl_member member1_ ON order0_.member_id = member1_.id
+//      LEFT OUTER JOIN query_dsl_order_item orderitem2_ ON order0_.id = orderitem2_.order_id
+        List<Order> orderList = query.select(QOrder.order)
+                .from(QOrder.order)
+                .join(QOrder.order.member)
+                .leftJoin(QOrder.order.orderItemList)
+                .fetch();
+
+        //then
+        Order firstOrder = orderList.get(0);
+        assertAll(
+                () -> assertThat(firstOrder).isEqualTo(order),
+                () -> assertThat(firstOrder.getMember()).isEqualTo(memberA),
+                () -> assertThat(firstOrder.getOrderItemList().get(0)).isEqualTo(orderItem)
+        );
+    }
+
+    @Test
+    @DisplayName("join on 절")
+    void joinOn() {
+
+        /*
+            SELECT order0_.id AS id1_24_, order0_.member_id AS member_i3_24_, order0_.name AS name2_24_
+            FROM query_dsl_order order0_
+            LEFT OUTER JOIN query_dsl_order_item orderiteml1_ ON order0_.id = orderiteml1_.order_id
+            and(orderiteml1_.name = orderiteml1_.name)
+        */
+        query.selectFrom(order)
+                .leftJoin(order.orderItemList, orderItem)
+                .on(orderItem.name.eq(orderItem.name))
+                .fetch();
+    }
+
+    @Test
+    @DisplayName("join fetch")
+    void joinFetch() {
+        /*
+        SELECT
+            order0_.id AS id1_24_0_,
+            member1_.id AS id1_23_1_,
+            orderiteml2_.id AS id1_25_2_,
+            order0_.member_id AS member_i3_24_0_,
+            order0_.name AS name2_24_0_,
+            member1_.age AS age2_23_1_,
+            member1_.username AS username3_23_1_,
+            orderiteml2_.name AS name2_25_2_,
+            orderiteml2_.order_id AS order_id3_25_2_,
+            orderiteml2_.order_id AS order_id3_25_0__,
+            orderiteml2_.id AS id1_25_0__
+        FROM query_dsl_order order0_
+        INNER JOIN query_dsl_member member1_ ON order0_.member_id = member1_.id
+        LEFT OUTER JOIN query_dsl_order_item orderiteml2_ ON order0_.id = orderiteml2_.order_id
+         */
+        List<Order> orderList = query.selectFrom(order)
+                .innerJoin(order.member, member).fetchJoin()
+                .leftJoin(order.orderItemList, orderItem).fetchJoin()
+                .fetch();
+    }
+
 }
