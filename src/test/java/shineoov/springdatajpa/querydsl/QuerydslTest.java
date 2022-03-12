@@ -1,6 +1,7 @@
 package shineoov.springdatajpa.querydsl;
 
 
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -202,4 +203,26 @@ public class QuerydslTest {
                 .fetch();
     }
 
+    @Test
+    @DisplayName("sub query")
+    public void subQeury() {
+        //given
+        em.persist(new Item("itemA", 1000));
+        em.persist(new Item("itemB", 2000));
+
+        QItem item = new QItem("main");
+        QItem itemSub = new QItem("sub");
+
+        //when
+        Item maxPriceItem = query.selectFrom(item)
+                .where(item.price.eq(
+                        JPAExpressions
+                                .select(itemSub.price.max())
+                                .from(itemSub)
+                )).fetchFirst();
+
+        //then
+        assertThat(maxPriceItem).isNotNull();
+        assertThat(maxPriceItem.getPrice()).isEqualTo(2000);
+    }
 }
