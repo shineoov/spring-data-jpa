@@ -2,7 +2,9 @@ package shineoov.springdatajpa.querydsl;
 
 
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPADeleteClause;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.querydsl.jpa.impl.JPAUpdateClause;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static shineoov.springdatajpa.querydsl.QItem.item;
 import static shineoov.springdatajpa.querydsl.QMember.member;
 import static shineoov.springdatajpa.querydsl.QOrder.order;
 import static shineoov.springdatajpa.querydsl.QOrderItem.orderItem;
@@ -30,9 +33,10 @@ public class QuerydslTest {
 
     JPAQueryFactory query;
 
-
     @BeforeEach
     void setUp() {
+        em.createQuery("delete from QueryDslItem ").executeUpdate();
+        // em.createQuery("delete from QueryDslMember ").executeUpdate();
         query = new JPAQueryFactory(em);
     }
 
@@ -55,7 +59,7 @@ public class QuerydslTest {
                 .fetch();
 
         //then
-        assertThat(memberList.size()).isEqualTo(2);
+        assertThat(memberList.size()).isGreaterThanOrEqualTo(2);
     }
 
     @Test
@@ -224,5 +228,40 @@ public class QuerydslTest {
         //then
         assertThat(maxPriceItem).isNotNull();
         assertThat(maxPriceItem.getPrice()).isEqualTo(2000);
+    }
+
+    @Test
+    @DisplayName("UPDATE Batch Query")
+    public void updateBatchQuery() {
+        //given
+        em.persist(new Item("itemA", 1000));
+        em.persist(new Item("itemB", 2000));
+
+        //when
+        JPAUpdateClause updateClause = new JPAUpdateClause(em, item);
+
+        long count = updateClause
+                .set(item.price, item.price.subtract(1000))
+                .where(item.name.eq("itemA"))
+                .execute();
+
+        //then
+        assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("DELETE Batch Query")
+    public void deleteBatchQuery() {
+        //given
+        em.persist(new Item("itemA", 1000));
+        em.persist(new Item("itemB", 2000));
+        em.persist(new Item("itemC", 1000));
+
+        //when
+        JPADeleteClause deleteClause = new JPADeleteClause(em, item);
+        long count = deleteClause.where(item.price.eq(1000)).execute();
+
+        //then
+        assertThat(count).isEqualTo(2);
     }
 }
