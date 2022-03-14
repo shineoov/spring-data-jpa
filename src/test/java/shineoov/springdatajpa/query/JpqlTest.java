@@ -413,4 +413,37 @@ public class JpqlTest {
         );
     }
 
+    @Test
+    @DisplayName("일괄 업데이트")
+    public void bulkUpdate() {
+        //given
+        em.persist(new Member("memberA", 10));
+        em.persist(new Member("memberA", 10));
+        em.persist(new Member("memberB", 10));
+
+        //when
+        int updatedCount = em.createQuery("update QueryMember as m set m.age = m.age + 1 where m.username = :username ")
+                .setParameter("username", "memberA")
+                .executeUpdate();
+
+        //then
+        assertThat(updatedCount).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("일괄 삭제")
+    public void bulkDelete() {
+        //given
+        em.persist(new Member("memberA", 10));
+        em.persist(new Member("memberA", 11));
+        em.persist(new Member("memberB", 12));
+
+        //when
+        int deletedCount = em.createQuery("delete from QueryMember as m where m.age > :age")
+                .setParameter("age", 10)
+                .executeUpdate();
+
+        //then
+        assertThat(deletedCount).isEqualTo(2);
+    }
 }
